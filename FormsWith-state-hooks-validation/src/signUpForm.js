@@ -1,42 +1,30 @@
 import React from "react";
+import FormHandler from "./formHandler";
+
+import { requiredValidation, minimumLengthValidation } from "./validations";
 
 const SignUpForm = () => {
-
   const FIELDS = {
     email: {
-      value:""
-
+      value: "",
+      validations: [requiredValidation, minimumLengthValidation(4)]
     }
-  }
+  };
 
-  const [fields, setFields] =  React.useState(FIELDS)
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
-  
-  const handleChange = (event) => {
-    const {name, value} = event.target;
-    const updatedField = {...fields[name]};
-    updatedField.value = value;
+  const {
+    fields,
+    isSubmitting,
+    isSubmittable,
+    handleChange,
+    handleBlur,
+    handleSubmit
+  } = FormHandler(FIELDS);
 
-    setFields({
-      ...fields,
-      [name]: updatedField
-    });
-  }
-
-  const handleSubmit = (event) =>{
-    event.preventDefault();
-    setIsSubmitting(true);
-    setTimeout(() =>{
-      console.log(fields);
-      setIsSubmitting(false);
-    },2000)
-  }
-
-  return ( 
+  return (
     <>
       <h1>Sign Up</h1>
 
-      <form noValidate onSubmit={handleSubmit} > 
+      <form noValidate onSubmit={handleSubmit}>
         <div className="form-group">
           <label for="email" className="">
             Email address
@@ -48,7 +36,8 @@ const SignUpForm = () => {
             id="email"
             name="email"
             type="email"
-            onChange = {handleChange}
+            onChange={handleChange}
+            onBlur={handleBlur}
             value={fields.email.value}
             placeholder="Enter email"
           />
@@ -56,10 +45,20 @@ const SignUpForm = () => {
             We'll never share your email with anyone else.
           </small>
           <small id="emailErrors" className="form-text text-danger">
-            Error
+            {fields.email.errors &&
+              fields.email.errors.map(error => (
+                <span>
+                  {error}
+                  <br />
+                </span>
+              ))}
           </small>
         </div>
-        <button className="btn btn-primary" type="submit" disabled={isSubmitting}>
+        <button
+          className="btn btn-primary"
+          type="submit"
+          disabled={isSubmitting || !isSubmittable}
+        >
           Submit
         </button>
       </form>
